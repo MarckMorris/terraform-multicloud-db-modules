@@ -2,6 +2,7 @@
 
 Reusable Terraform modules for provisioning managed database infrastructure across GCP and AWS behind a single, consistent interface.
 
+[![CI](https://github.com/MarckMorris/terraform-multicloud-db-modules/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/MarckMorris/terraform-multicloud-db-modules/actions/workflows/ci-cd.yml)
 [![Terraform](https://img.shields.io/badge/Terraform-1.5+-blue)](https://www.terraform.io/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -60,6 +61,10 @@ Environment settings live in `configs/`.
 | `database.instance_type` | Instance sizing |
 | `scaling.min_replicas` | Minimum read replicas |
 | `scaling.max_replicas` | Maximum read replicas |
+
+## Continuous integration
+
+Every push runs `terraform init -backend=false` and `terraform validate` against the root configuration. The pipeline needs no cloud credentials, so it runs on any fork.
 
 ## License
 
