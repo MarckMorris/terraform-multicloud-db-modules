@@ -1,253 +1,29 @@
-# Terraform Multicloud Db Modules
-
-![Terraform](https://img.shields.io/badge/Terraform-blue) ![OpenTofu](https://img.shields.io/badge/OpenTofu-blue) ![Sentinel](https://img.shields.io/badge/Sentinel-blue) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Status](https://img.shields.io/badge/status-production--ready-brightgreen)
-
-## Overview
-
-Reusable Terraform modules for database provisioning across major cloud providers. This project demonstrates enterprise-grade reliability engineering practices with a focus on automation, observability, and operational excellence.
-
-## Features
-
-- **High Availability**: Designed for 99.99% uptime with automated failover
-- **Scalability**: Horizontal scaling capabilities with load-based auto-scaling
-- **Security**: Industry-standard security practices and compliance
-- **Monitoring**: Comprehensive observability with metrics, logs, and traces
-- **Automation**: Infrastructure as Code and GitOps workflows
-
-## Architecture
-
-```
-┌─────────────────┐
-│   Application   │
-└────────┬────────┘
-         │
-┌────────▼────────┐
-│   Load Balancer │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    │         │
-┌───▼──┐  ┌──▼───┐
-│ DB 1 │  │ DB 2 │
-└──────┘  └──────┘
-```
-
-## Tech Stack
-
-- **Terraform**
-- **OpenTofu**
-- **Sentinel**
-- **GitHub Actions**
-
-## Prerequisites
-
-- Docker 20.10+
-- Kubernetes 1.24+ (if applicable)
-- Terraform 1.5+
-- Python 3.9+
-- Cloud provider account (AWS/GCP/Azure)
-
-## Quick Start
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/terraform-multicloud-db-modules.git
-cd terraform-multicloud-db-modules
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure environment
-cp .env.example .env
-# Edit .env with your settings
-
-# Deploy infrastructure
-cd terraform
-terraform init
-terraform plan
-terraform apply
-```
-
-### Configuration
-
-Key configuration parameters in `configs/config.yaml`:
-
-```yaml
-database:
-  type: postgresql
-  version: "14"
-  instance_type: db.m5.large
-  
-monitoring:
-  prometheus_port: 9090
-  scrape_interval: 15s
-  
-scaling:
-  min_replicas: 2
-  max_replicas: 10
-  target_cpu: 70
-```
-
-## Usage
-
-### Basic Operations
-
-```bash
-# Start the system
-./scripts/start.sh
-
-# Check health
-./scripts/health-check.sh
-
-# View metrics
-open http://localhost:3000  # Grafana dashboard
-
-# Run tests
-pytest tests/
-```
-
-### Advanced Operations
-
-```bash
-# Trigger failover
-./scripts/failover.sh --region us-west-2
-
-# Scale up
-./scripts/scale.sh --replicas 5
-
-# Backup database
-./scripts/backup.sh --type full
-```
-
-## Testing
-
-```bash
-# Unit tests
-pytest tests/unit/
-
-# Integration tests
-pytest tests/integration/
-
-# Load tests
-locust -f tests/load/locustfile.py
-
-# Chaos tests
-./scripts/chaos-test.sh
-```
-
-## Monitoring & Observability
-
-### Metrics
-
-Key metrics tracked:
-- Query latency (p50, p95, p99)
-- Connection pool utilization
-- Replication lag
-- Error rates
-- Resource utilization (CPU, memory, disk)
-
-### Dashboards
-
-Access Grafana dashboards at `http://localhost:3000`:
-- Overview Dashboard
-- Performance Metrics
-- Replication Status
-- Alert History
-
-### Alerts
-
-Configured alerts:
-- High error rate (>1%)
-- Replication lag (>30s)
-- Disk usage (>80%)
-- Connection saturation (>90%)
-
-## Performance
-
-Benchmark results on m5.xlarge instances:
-
-| Metric | Value |
-|--------|-------|
-| Max QPS | 10,000 |
-| P99 Latency | 25ms |
-| Uptime | 99.99% |
-| MTTR | <5 min |
-
-## Security
-
-- **Encryption**: At-rest and in-transit encryption enabled
-- **Authentication**: mTLS for service communication
-- **Secrets**: HashiCorp Vault integration
-- **Compliance**: SOC2, HIPAA-ready configurations
-- **Auditing**: Complete audit logs with retention
-
-## Disaster Recovery
-
-- **RTO**: 15 minutes
-- **RPO**: 5 minutes
-- **Backup Schedule**: Hourly incremental, daily full
-- **Geo-redundancy**: Multi-region replication
-- **Automated Failover**: Health-check based switching
-
-## Troubleshooting
-
-### Common Issues
-
-**Issue**: High replication lag
-```bash
-# Check replication status
-./scripts/check-replication.sh
-
-# Force sync
-./scripts/force-sync.sh
-```
-
-**Issue**: Connection pool exhausted
-```bash
-# Check active connections
-./scripts/check-connections.sh
-
-# Increase pool size
-./scripts/scale-connections.sh --size 200
-```
-
-## Contributing
-
-Contributions are welcome! Please follow these guidelines:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## Roadmap
-
-- [ ] Multi-cloud support expansion
-- [ ] Advanced ML-based auto-tuning
-- [ ] Enhanced chaos engineering scenarios
-- [ ] GraphQL API support
-- [ ] Real-time analytics dashboard
-
+# Terraform Multi-Cloud Database Modules
+Reusable Terraform modules for provisioning managed database infrastructure across GCP and AWS behind a single, consistent interface.
+[![Terraform](https://img.shields.io/badge/Terraform-1.5+-blue)](https://www.terraform.io/) [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+**Project status.** Personal portfolio project. The modules are functional and validated in CI, but this is not a deployed production system. Treat the configurations as reference implementations rather than battle-tested infrastructure.
+## What this solves
+Provisioning a managed database on any single cloud is straightforward. Doing it consistently across providers, with the same variable contract, the same tagging conventions and the same high-availability defaults, is where teams usually end up maintaining two Terraform codebases that quietly drift apart.
+These modules wrap GCP Cloud SQL and AWS RDS behind a common interface, so an equivalent module call produces equivalent infrastructure on either provider.
+## Design decisions
+**A shared variable contract.** The same inputs describe intent on both providers. Where the underlying resources differ, such as Cloud SQL high availability versus RDS Multi-AZ, the module absorbs the difference rather than pushing it onto the caller.
+**High availability is the default, not an opt-in.** Making HA optional means it gets skipped under deadline pressure. Multi-zone deployment and automated backups are enabled by default; single-zone is the explicit override.
+**GitOps over local state.** The modules assume plan and apply run through CI against remote state, not from an engineer's laptop.
+## Repository structure
+The `modules/` directory holds the Terraform modules, one per provider and resource type. `terraform/` contains the root configuration and example usage, `configs/` the environment configuration files, `scripts/` helper scripts for local workflows, and `tests/` the module validation tests. The CI pipeline lives in `.github/workflows/`.
+## Requirements
+Terraform 1.5 or later, OpenTofu also supported. A GCP or AWS account with credentials configured. Docker is optional, for the containerized workflow.
+## Quick start
+Clone with `git clone https://github.com/MarckMorris/terraform-multicloud-db-modules.git`, then copy `.env.example` to `.env` and fill in your project and account details. From the `terraform/` directory run `terraform init` followed by `terraform plan`.
+Review the plan before applying. These modules create billable cloud resources.
+## Configuration
+Environment settings live in `configs/`. The main parameters are `database.type` for the engine, PostgreSQL or MySQL; `database.version` for the engine version; `database.instance_type` for sizing; and `scaling.min_replicas` and `scaling.max_replicas` to bound the read replica count.
+## Continuous integration
+The GitHub Actions workflow runs `terraform fmt -check`, `terraform validate` and a plan against each module on every push. It does not apply.
+## Scope
+What this repository is not: a deployed production system, a live monitoring stack, or a benchmarked workload. The `tests/` directory validates module correctness, not runtime performance. No performance figures are published here because none have been measured under load.
 ## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built with industry best practices from Google SRE handbook
-- Inspired by Netflix's reliability engineering
-- Community contributions and feedback
-
-## Contact
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/terraform-multicloud-db-modules/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/terraform-multicloud-db-modules/discussions)
-
----
-
-**Note**: This is a production-grade implementation. Always test in staging before deploying to production.
+MIT. See [LICENSE](LICENSE).
+## Author
+**Marcos Morris**, Cloud Infrastructure Engineer, Bentonville, AR.
+LinkedIn <https://www.linkedin.com/in/marck-morris/> · Portfolio <https://marckmorris.github.io/> · marck.morris.pro@gmail.com
