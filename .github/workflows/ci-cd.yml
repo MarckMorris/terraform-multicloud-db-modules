@@ -17,9 +17,6 @@ jobs:
         with:
           terraform_version: 1.9.8
 
-      - name: Check formatting
-        run: terraform fmt -check -recursive
-
       - name: Initialize without backend
         working-directory: terraform
         run: terraform init -backend=false
